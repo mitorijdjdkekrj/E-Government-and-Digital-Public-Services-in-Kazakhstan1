@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Behind the ranking: e-government in Kazakhstan, in 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF4F6; --surface:#FFFFFF; --ink:#0F2B36; --muted:#566C75; --line:#D3DEE2; --dot:#9FB6BE; --dot-vh:#0F6F82;
+  --kz:#0090A8; --sun:#C99700; --ru:#B9473E; --ee:#3A67C9; --kr:#7A55B5; --pr:#D9861A;
+  --display:"Unbounded","Arial Black","Helvetica Neue",Arial,sans-serif;
+  --body:"Onest","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#08161C; --surface:#10232B; --ink:#E6F0F2; --muted:#93A9B1; --line:#23404A; --dot:#4C6B76; --dot-vh:#5FD3E6;
+    --kz:#2BC3DB; --sun:#F2C230; --ru:#E26A60; --ee:#7299EA; --kr:#AC88E2; --pr:#F0A23A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#08161C; --surface:#10232B; --ink:#E6F0F2; --muted:#93A9B1; --line:#23404A; --dot:#4C6B76; --dot-vh:#5FD3E6;
+  --kz:#2BC3DB; --sun:#F2C230; --ru:#E26A60; --ee:#7299EA; --kr:#AC88E2; --pr:#F0A23A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16.5px; line-height:1.55; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+h1,h2,h3{font-family:var(--display); font-weight:700; line-height:1.1; margin:0}
+h1{font-size:clamp(30px,4.4vw,56px); letter-spacing:-0.01em}
+h2{font-size:clamp(23px,2.6vw,34px); margin-bottom:12px}
+h3{font-size:16px; font-weight:500}
+p{margin:0 0 12px}
+.lead{color:var(--muted); font-size:clamp(15.5px,1.25vw,18px)}
+.src{font-size:12.5px; color:var(--muted); margin:14px 0 0}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--sun); outline-offset:2px}
+
+/* progress + header */
+.progress{position:fixed; top:0; left:0; height:3px; width:100%; z-index:40; transform-origin:0 50%; transform:scaleX(0); background:linear-gradient(90deg,var(--kz),var(--sun),var(--ru))}
+header.top{position:fixed; top:env(safe-area-inset-top,0px); left:0; right:0; z-index:30; display:flex; align-items:center; gap:18px; height:54px; padding:0 22px; background:color-mix(in srgb,var(--bg) 72%,transparent); backdrop-filter:blur(10px); border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+header.top strong{font-family:var(--display); font-size:13.5px; font-weight:500; white-space:nowrap}
+.dots-nav{display:flex; gap:10px; overflow-x:auto}
+.dots-nav a{width:10px; height:10px; border-radius:50%; background:var(--line); flex:none; transition:transform .3s, background .3s}
+.dots-nav a.on{background:var(--kz); transform:scale(1.5)}
+.theme{margin-left:auto; background:none; border:1px solid var(--line); color:var(--ink); border-radius:20px; padding:4px 12px; font-size:13px}
+
+/* stage */
+#gl{position:fixed; top:0; right:0; width:60vw; height:100vh; height:100lvh; z-index:0; display:block}
+.vignette{position:fixed; top:0; left:0; width:48vw; height:100vh; z-index:0; pointer-events:none; background:linear-gradient(90deg,var(--bg) 62%,transparent)}
+.glabel{position:fixed; z-index:2; pointer-events:none; right:24px; bottom:calc(20px + env(safe-area-inset-bottom,0px)); font-size:12.5px; color:var(--muted); background:color-mix(in srgb,var(--surface) 80%,transparent); padding:6px 12px; border-radius:20px; border:1px solid var(--line); max-width:46vw}
+.tip{position:fixed; z-index:20; pointer-events:none; background:var(--ink); color:var(--bg); padding:8px 12px; border-radius:8px; font-size:13px; line-height:1.35; transform:translate(-50%,-125%); white-space:nowrap}
+.tip b{font-family:var(--display); font-weight:500; font-size:16px; display:block}
+.tip[hidden]{display:none}
+
+main{position:relative; z-index:1}
+.scene{min-height:100vh; min-height:100svh; display:flex; align-items:center; padding:90px 0 60px 5vw}
+.card{width:min(40vw,540px); background:color-mix(in srgb,var(--surface) 86%,transparent); backdrop-filter:blur(12px); border:1px solid var(--line); border-radius:18px; padding:28px 30px; box-shadow:0 20px 50px -30px rgba(0,0,0,.35)}
+.hero .card{background:transparent; border:0; box-shadow:none; backdrop-filter:none; padding:0}
+.hero .lead{margin-top:16px}
+.kicker{font-size:13.5px; color:var(--kz); font-weight:500; margin-bottom:10px}
+
+/* entrance */
+.reveal > *{opacity:0; transform:translateY(26px); transition:opacity .7s, transform .8s cubic-bezier(.2,.8,.2,1)}
+.reveal.in > *{opacity:1; transform:none}
+.reveal.in > *:nth-child(2){transition-delay:.08s} .reveal.in > *:nth-child(3){transition-delay:.16s}
+.reveal.in > *:nth-child(4){transition-delay:.24s} .reveal.in > *:nth-child(5){transition-delay:.32s} .reveal.in > *:nth-child(n+6){transition-delay:.4s}
+
+/* controls */
+.row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px}
+.chip{border:1.5px solid var(--c,var(--ink)); background:transparent; color:var(--ink); padding:6px 13px; border-radius:20px; font-size:13.5px; display:inline-flex; gap:8px; align-items:center; transition:background .25s, color .25s, transform .2s}
+.chip:hover{transform:translateY(-2px)}
+.chip.dot::before{content:""; width:9px; height:9px; border-radius:50%; background:var(--c)}
+.chip[aria-pressed="true"],.chip[aria-selected="true"]{background:var(--c,var(--ink)); color:#fff}
+.chip[aria-pressed="true"]::before,.chip[aria-selected="true"]::before{background:#fff}
+.big{font-family:var(--display); font-weight:700; font-size:clamp(34px,4vw,54px); line-height:1; font-variant-numeric:tabular-nums}
+.ranks{display:flex; gap:28px; margin-top:22px}
+.rk{font-size:13.5px; color:var(--muted)}
+.rk b{display:block; font-family:var(--display); font-size:30px; line-height:1.1; font-variant-numeric:tabular-nums}
+.rk.kz b{color:var(--kz)} .rk.ru b{color:var(--ru)}
+.stats{display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:14px; border-top:1px solid var(--line)}
+.stats div{padding:12px 12px 12px 0; border-bottom:1px solid var(--line)}
+.stats b{display:block; font-family:var(--display); font-size:22px; font-variant-numeric:tabular-nums}
+.stats span{font-size:13px; color:var(--muted)}
+.stats .s b{color:var(--kz)} .stats .e b{color:var(--ru)}
+.insight{margin-top:16px; padding:12px 14px; border-left:4px solid var(--sun); background:color-mix(in srgb,var(--sun) 10%,transparent); border-radius:0 8px 8px 0; font-size:14.5px; min-height:3.2em}
+.crit{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px}
+.crit th{text-align:left; font-weight:500; color:var(--muted); width:36%; padding:7px 10px 7px 0; vertical-align:top; border-top:1px solid var(--line)}
+.crit td{padding:7px 0; border-top:1px solid var(--line); vertical-align:top}
+.sl{margin-bottom:10px}
+.sl label{display:flex; justify-content:space-between; font-size:13.5px}
+.sl label b{font-weight:500; color:var(--muted); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--kz)}
+.board{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:12px}
+.board div{border-radius:10px; padding:8px; background:color-mix(in srgb,var(--c) 14%,transparent); text-align:center; transition:order .3s}
+.board b{display:block; font-family:var(--display); font-size:18px; color:var(--c); font-variant-numeric:tabular-nums}
+.board span{font-size:11.5px; color:var(--muted)}
+.recs{margin-top:12px; border-top:1px solid var(--line)}
+.rec{display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--line); color:var(--ink); padding:9px 0; font-size:14px}
+.rec b{font-family:var(--display); font-weight:500; color:var(--sun); margin-right:6px}
+.rec small{display:block; color:var(--muted); font-size:12.5px; margin-top:2px}
+.rec .more{display:none; color:var(--muted); font-size:13px; margin-top:6px}
+.rec[aria-expanded="true"] .more{display:block}
+.rec[aria-expanded="true"]{color:var(--kz)}
+.layers{display:flex; flex-direction:column; gap:6px; margin-top:12px}
+.layer{border:1px solid var(--line); background:transparent; border-radius:10px; padding:10px 12px; text-align:left; color:var(--ink); font-size:13.5px; transition:transform .3s, border-color .3s}
+.layer strong{font-family:var(--display); font-weight:500; display:block; font-size:14px}
+.layer span{color:var(--muted)}
+.layer[aria-pressed="true"]{border-color:var(--kz); transform:translateX(8px)}
+
+/* team */
+.team ul{list-style:none; padding:0; margin:26px 0 0; display:flex; flex-wrap:wrap; gap:16px 30px}
+.member{position:relative; display:flex; flex-direction:column; align-items:flex-start; outline-offset:6px; cursor:default}
+.mate{position:relative; display:inline-block; font-family:var(--display); font-size:clamp(15px,1.5vw,19px); font-weight:500; padding:0 0 14px}
+.mate .ch{display:inline-block; transition:transform .35s cubic-bezier(.3,1.6,.5,1), color .25s; transition-delay:calc(var(--i)*28ms)}
+.mate .ch.sp{width:.3em}
+.mate::after{content:""; position:absolute; left:0; bottom:4px; width:8px; height:8px; border-radius:50%; background:var(--c); transition:width .45s cubic-bezier(.2,.8,.2,1), border-radius .45s}
+.member:hover .ch,.member:focus-visible .ch{transform:translateY(-7px); color:var(--c)}
+.member:hover .mate::after,.member:focus-visible .mate::after{width:100%; border-radius:4px}
+.ava{position:absolute; left:50%; bottom:calc(100% + 10px); width:132px; height:132px; border-radius:50%; z-index:5; pointer-events:none; opacity:0; transform:translate(-50%,16px) scale(.55); transform-origin:50% 100%; transition:opacity .25s, transform .5s cubic-bezier(.3,1.5,.5,1); box-shadow:0 0 0 4px var(--c), 0 14px 30px rgba(0,0,0,.22)}
+.ava svg{width:100%; height:100%; display:block; border-radius:50%}
+.member:hover .ava,.member:focus-visible .ava{opacity:1; transform:translate(-50%,0) scale(1)}
+.ava .eyes{transform-box:fill-box; transform-origin:center}
+.member:hover .ava .eyes,.member:focus-visible .ava .eyes{animation:blink .45s .55s 2}
+@keyframes blink{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.1)}}
+.badge{position:absolute; right:-8px; top:-4px; width:42px; height:42px; border-radius:50%; background:var(--surface); border:2px solid var(--c); display:grid; place-items:center; color:var(--ink); transform:scale(0) rotate(-40deg); transition:transform .45s .25s cubic-bezier(.3,1.6,.5,1)}
+.badge svg{width:26px; height:26px; overflow:visible}
+.badge .glass{fill:none; stroke:currentColor; stroke-width:1.6; transition:fill .3s .6s}
+.badge .rays{opacity:0; transition:opacity .3s .6s}
+.member:hover .badge,.member:focus-visible .badge{transform:scale(1) rotate(0)}
+.member:hover .badge .glass,.member:focus-visible .badge .glass{fill:#FFD54A}
+.member:hover .badge .rays,.member:focus-visible .badge .rays{opacity:1; animation:pulse 1.2s .9s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.refs{font-size:12px; color:var(--muted); margin-top:22px; padding-left:16px}
+.refs li{margin-bottom:4px}
+.nogl{position:fixed; right:24px; top:80px; z-index:3; max-width:360px; font-size:14px; color:var(--muted)}
+.nogl[hidden]{display:none}
+
+@media (max-width:860px){
+  #gl{width:100vw}
+  .vignette{display:none}
+  .scene{align-items:flex-end; padding:52vh 14px 40px; padding-top:52svh}
+  .hero.scene{padding-top:46vh; padding-top:46svh}
+  .card{width:100%}
+  .hero .card{background:color-mix(in srgb,var(--surface) 86%,transparent); border:1px solid var(--line); padding:22px; backdrop-filter:blur(12px)}
+  .glabel{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important; animation:none!important}
+  .reveal > *{opacity:1; transform:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="top">
+  <strong>Behind the ranking</strong>
+  <nav class="dots-nav" id="dnav" aria-label="Sections"></nav>
+  <button class="theme" id="theme" aria-label="Toggle colour theme">Theme</button>
+</header>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="vignette"></div>
+<div class="glabel" id="glabel">Each point is one of the 193 UN member states</div>
+<div class="tip" id="tip" hidden></div>
+<p class="nogl" id="nogl" hidden>The 3D scenes need WebGL, which this browser has turned off. All the data is still in the text panels.</p>
+
+<main>
+<section class="scene hero" data-s="hero" id="s-hero" data-name="Start">
+  <div class="card reveal">
+    <p class="kicker">ICT research project · Kazakhstan, Russia, Estonia, South Korea</p>
+    <h1>Kazakhstan climbed 15 places in six years. Its citizens still report errors.</h1>
+    <p class="lead">The globe of points is the UN E-Government ranking: 193 countries, rank 1 at the top. Pick a year and watch Kazakhstan and Russia move.</p>
+    <div class="ranks">
+      <div><div class="big" id="yr">2018</div></div>
+      <div class="rk kz">Kazakhstan<b id="kzr">39th</b><span id="kzv">0.7597</span></div>
+      <div class="rk ru">Russia<b id="rur">32nd</b><span id="ruv">0.7969</span></div>
+    </div>
+    <div class="row" role="group" aria-label="Survey year">
+      <button class="chip" data-y="0" aria-pressed="true">2018</button>
+      <button class="chip" data-y="1" aria-pressed="false">2020</button>
+      <button class="chip" data-y="2" aria-pressed="false">2022</button>
+      <button class="chip" data-y="3" aria-pressed="false">2024</button>
+      <button class="chip" id="play" style="--c:var(--sun)">Replay</button>
+    </div>
+    <p class="src">Source: UN DESA E-Government Knowledgebase, 2018–2024. Scroll to continue.</p>
+  </div>
+</section>
+
+<section class="scene" data-s="gap" id="s-gap" data-name="Problem">
+  <div class="card reveal">
+    <h2>Rankings count services. Citizens experience them.</h2>
+    <p class="lead">The scale tips towards the ranking: supply looks strong, while experience lags behind.</p>
+    <div class="stats">
+      <div class="s"><b>24th</b><span>in the UN EGDI, 2024</span></div>
+      <div class="e"><b>23.29%</b><span>name technical errors as the main problem</span></div>
+      <div class="s"><b>10th</b><span>in online services, 2024</span></div>
+      <div class="e"><b>0.8403</b><span>human capital and e-literacy, weakest component</span></div>
+      <div class="s"><b>51.5M</b><span>services delivered online in 2025</span></div>
+      <div class="e"><b>41st</b><span>in telecom infrastructure</span></div>
+    </div>
+    <p class="src">Sources: UN DESA (2024); eGov.kz (2024, 2025b); El.kz (2026); Amirova (2025).</p>
+  </div>
+</section>
+
+<section class="scene" data-s="comp" id="s-comp" data-name="Components">
+  <div class="card reveal">
+    <h2>Online services near the top. Skills are not.</h2>
+    <p class="lead">Drag the chart to rotate it and point at a bar to read its value.</p>
+    <div class="row" id="dsrow" role="group" aria-label="Dataset">
+      <button class="chip" data-ds="0" aria-pressed="true" style="--c:var(--kz)">Components, 2024</button>
+      <button class="chip" data-ds="1" aria-pressed="false" style="--c:var(--ru)">EGDI over time</button>
+    </div>
+    <div class="row" id="ctog" role="group" aria-label="Countries"></div>
+    <div class="insight" id="cins"></div>
+    <p class="src" id="cnote"></p>
+  </div>
+</section>
+
+<section class="scene" data-s="cit" id="s-cit" data-name="Citizens">
+  <div class="card reveal">
+    <h2>Two-thirds of complaints can be fixed by engineering and redesign</h2>
+    <p class="lead">A national survey of 27,336 egov.kz users, 2024. Each slice is a problem type; its height is its share. Pick one.</p>
+    <div class="row" id="ptog" role="group" aria-label="Problem types"></div>
+    <div class="insight" id="pins"></div>
+    <p class="src">Source: Amirova (2025), Table 6. Respondents were authenticated users; 98.43% lived in cities.</p>
+  </div>
+</section>
+
+<section class="scene" data-s="ctry" id="s-ctry" data-name="Countries">
+  <div class="card reveal">
+    <h2>Four countries, four delivery models</h2>
+    <p class="lead">Pillar height shows each country's EGDI. Choose a country.</p>
+    <div class="row" id="tabs" role="tablist"></div>
+    <div id="cpanel"></div>
+    <p class="src">Sources: UN DESA (2024); Amirova (2025); Dovlatova et al. (2025); bne IntelliNews (2026); e-Estonia; Eurostat (2026); OECD (2025, 2026).</p>
+  </div>
+</section>
+
+<section class="scene" data-s="score" id="s-score" data-name="Evaluation">
+  <div class="card reveal">
+    <h2>Change the weights. The leaders stay the same.</h2>
+    <p class="lead">Four platforms scored 1–5 on six criteria. Move a slider and the podium reorders.</p>
+    <div id="sliders"></div>
+    <div class="row"><button class="chip" id="wProject">Project weights</button><button class="chip" id="wEqual">Equal weights</button></div>
+    <div class="board" id="board"></div>
+    <p class="src">Scores from Table 8 of the project. Russia's reliability score of 3 is neutral (no independent evidence).</p>
+  </div>
+</section>
+
+<section class="scene" data-s="plan" id="s-plan" data-name="Roadmap">
+  <div class="card reveal">
+    <h2>Six recommendations over three years</h2>
+    <p class="lead">Each capsule on the track is one recommendation, from month 0 to 36. Select one.</p>
+    <div class="recs" id="recs"></div>
+  </div>
+</section>
+
+<section class="scene" data-s="arch" id="s-arch" data-name="Architecture">
+  <div class="card reveal">
+    <h2>A target architecture in five layers</h2>
+    <p class="lead">Each layer reuses the one below it, so citizens give their data only once. Select a layer to pull it out.</p>
+    <div class="layers" id="layers"></div>
+    <div class="insight" id="anote">Governance runs across all layers: one once-only law (R1), public reliability targets (R3), independent audits (R5) and citizen-experience indicators (R6).</div>
+  </div>
+</section>
+
+<section class="scene team" data-s="team" id="s-team" data-name="Team">
+  <div class="card reveal">
+    <h2>Project team</h2>
+    <p class="lead">E-Government and Digital Public Services in Kazakhstan: Comparative Analysis with Russia, Estonia and South Korea. ICT Project Assignment 2, 2026.</p>
+    <ul id="team"></ul>
+    <ol class="refs">
+      <li>UN DESA (2024). E-Government Survey 2024; UN E-Government Knowledgebase.</li>
+      <li>Amirova, A. (2025). Frontiers in Political Science, 7, 1679601.</li>
+      <li>OECD (2025, 2026); Eurostat (2026); eGov.kz (2024–2025); bne IntelliNews (2026).</li>
+    </ol>
+  </div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const root=document.documentElement;
+const cv=n=>getComputedStyle(root).getPropertyValue(n).trim();
+const ord=n=>n+(n%100>=11&&n%100<=13?'th':({1:'st',2:'nd',3:'rd'}[n%10]||'th'));
+const $=id=>document.getElementById(id);
+const tip=$('tip');
+
+/* ---------------- theme ---------------- */
+try{ const t=localStorage.getItem('egov-theme'); if(t) root.dataset.theme=t; }catch(e){}
+$('theme').onclick=()=>{ const dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme=dark?'light':'dark'; try{localStorage.setItem('egov-theme',root.dataset.theme);}catch(e){} };
+
+/* ---------------- data ---------------- */
+const YEARS=[2018,2020,2022,2024];
+const KZ={r:[39,29,28,24],v:[0.7597,0.8375,0.8628,0.9009]}, RU={r:[32,36,42,43],v:[0.7969,0.8244,0.8162,0.8532]};
+const CO=[{k:'kz',n:'Kazakhstan',c:'--kz'},{k:'ru',n:'Russia',c:'--ru'},{k:'ee',n:'Estonia',c:'--ee'},{k:'kr',n:'South Korea',c:'--kr'}];
+const DS=[
+ {rows:[0,1,2,3], cols:['OSI','TII','HCI','EGDI'], min:0.5,
+  v:[[0.9390,0.9235,0.8403,0.9009],[0.7766,0.9512,0.8319,0.8532],[0.9954,0.9731,0.9497,0.9727],[1.0000,0.9917,0.9120,0.9679]],
+  note:'Bars start at 0.50. OSI = online services, TII = infrastructure, HCI = human capital and e-literacy. Source: UN DESA (2024).'},
+ {rows:[0,1], cols:['2018','2020','2022','2024'], min:0.7,
+  v:[[0.7597,0.8375,0.8628,0.9009],[0.7969,0.8244,0.8162,0.8532]],
+  note:'EGDI value per survey year; bars start at 0.70. Source: UN E-Government Knowledgebase.'}];
+const PG=[{k:'op',n:'Operational / technical',c:'--kz',v:29.49,t:'Technical errors (23.29%) and low integration with the portal (6.20%). Addressed by a reliability programme and an interoperability layer (R2, R3).'},
+ {k:'pr',n:'Process',c:'--pr',v:33.75,t:'Unnecessary bureaucracy (15.24%), unclear service algorithms (12.05%) and excessive approvals (6.46%): the largest group. Addressed by redesign and once-only rules (R1).'},
+ {k:'hu',n:'Human',c:'--ee',v:14.45,t:'Staff competence gaps (14.45%), consistent with the low human capital score. Addressed by training and assisted-digital channels (R4).'},
+ {k:'le',n:'Legal',c:'--kr',v:9.37,t:'Imperfect legislation (9.37%): provisions on composite and proactive services are scattered. Addressed by one codified law (R1).'},
+ {k:'go',n:'Governance',c:'--ru',v:9.57,t:'Opaque accountability (5.30%) and weak evaluation (4.27%). Addressed by independent audits and citizen-experience indicators (R5, R6).'},
+ {k:'ot',n:'Other',c:'--dot',v:3.38,t:'Other problems (3.38%).'}];
+const CT=[
+ {rank:24,egdi:0.9009,model:'Mobile-first single window: egov.kz and eGov Mobile',rows:[['Weakest component','Human capital, 0.8403'],['Digital identity','Digital signature and, since 2020, biometrics'],['Interoperability','Once-only basis in law but scattered'],['Scale','>14.8M accounts; 11.7M eGov Mobile users'],['Service model','Reactive, with proactive pilots']]},
+ {rank:43,egdi:0.8532,model:'Centralised mass portal: Gosuslugi',rows:[['Weakest component','Online services, 0.7766 (0.9167 in 2018)'],['Digital identity','Single portal account'],['Interoperability','Interdepartmental system; fragmentation persists'],['Scale','~112M users; >1,600 services'],['Service model','Reactive; data-triggered services planned']]},
+ {rank:2,egdi:0.9727,model:'Decentralised interoperability (X-Road) and mandatory eID',rows:[['Weakest component','Human capital, 0.9497'],['Digital identity','85% used eID for public services in 2025 (EU: 46%)'],['Interoperability','X-Road since 2001: logged, open-source'],['Scale','Near-universal eID uptake'],['Service model','Life-event bundles']]},
+ {rank:4,egdi:0.9679,model:'Platform-based, proactive, multi-channel: Government24',rows:[['Weakest component','Human capital, 0.9120'],['Digital identity','Mobile ID for all citizens since March 2025'],['Interoperability','Data-driven public sector score 1.00 (OECD)'],['Scale','>1,500 services; access via NAVER and Kakao'],['Service model','Proactive: 0.94 vs OECD 0.67']]}];
+const CRIT=['Coverage and quality','Interoperability','Reliability','Security and accountability','Inclusion','Proactivity'];
+const PW=[15,20,15,20,15,15]; const SC=[[4,3,2,3,3,2],[3,3,3,2,2,2],[5,5,4,4,4,4],[5,5,4,4,4,5]];
+const R=[['R3','Reliability programme with public service-level targets',0,12,'Technical errors are the top problem (23.29%). Indicator: error rate, time to fix. Lead: NITEC.'],
+ ['R6','Citizen-experience and eID-use indicators next to rankings',0,12,'EGDI is relative and its method changes. Indicator: satisfaction and eID use. Lead: MDDIAI, Bureau of National Statistics.'],
+ ['R4','Permanent assisted-digital channels and e-literacy',0,24,'HCI is the weakest component (0.8403); survey 98.43% urban. Indicator: rural–urban success gap. Lead: Government for Citizens, akimats.'],
+ ['R1','One law for once-only and proactive services',12,24,'Provisions scattered; Korea proactiveness 0.94 vs OECD 0.67. Indicator: share of pre-filled services. Lead: MDDIAI, Parliament.'],
+ ['R5','Independent privacy and cybersecurity audits',12,24,'Cybersecurity rated 3.8/5; dual-use concerns. Indicator: published audits, breach response time. Lead: MDDIAI and an independent auditor.'],
+ ['R2','Logged, open-standard interoperability layer',12,36,'X-Road experience; 6.20% report low integration. Indicator: registers connected, API uptime. Lead: MDDIAI, NITEC.']];
+const L=[['Channels','eGov Mobile, egov.kz, assisted-digital PSC counters','R4: keep in-person help so nobody is excluded.'],
+ ['Service layer','Life-event bundles, proactive services, AI search','R1: the state acts first when it already has the data.'],
+ ['Trust layer','eID, e-signature, biometrics, consent, data-access log','R2, R5: every access to personal data is logged and visible to the citizen.'],
+ ['Interoperability','X-Road-type logged exchange, open standards, APIs','R2, R3: registers talk directly, so citizens stop carrying data between agencies.'],
+ ['Data layer','Authoritative base registers, Smart Data Ukimet','R2: one authoritative source per data item.']];
+const TEAM=[['Makhsot Magzhan','--kz',`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true"> <defs><clipPath id="clM"><circle cx="100" cy="100" r="96"/></clipPath></defs> <circle cx="100" cy="100" r="96" fill="#D6E9EE"/> <g clip-path="url(#clM)"> <path d="M24 200 C26 164 52 150 100 146 C148 150 174 164 176 200 Z" fill="#16181D"/> <path d="M84 148 L100 182 L116 148 Z" fill="#FFFFFF"/> <path d="M96.5 153 L103.5 153 L105.5 163 L102 190 L98 190 L94.5 163 Z" fill="#B3212E"/> <path d="M96 152 L104 152 L102.4 158 L97.6 158 Z" fill="#8E1823"/> <path d="M84 148 L72 154 L95 196 L100 182 Z" fill="#23262D"/> <path d="M116 148 L128 154 L105 196 L100 182 Z" fill="#23262D"/> <path d="M134 172 L149 169 L147 176 L136 177 Z" fill="#B3212E"/> <circle cx="112" cy="190" r="2" fill="#3A3E47"/><circle cx="88" cy="190" r="2" fill="#3A3E47"/> <path d="M87 124 L113 124 L115 150 L100 156 L85 150 Z" fill="#E0B08C"/> <path d="M87 132 Q100 140 113 132 L113 124 L87 124 Z" fill="#CC9874"/> <path d="M60 100 C54 66 66 34 100 32 C134 34 146 66 140 100 L134 100 L134 80 L66 80 L66 100 Z" fill="#141010"/> <ellipse cx="64" cy="98" rx="6.5" ry="11" fill="#E0B08C"/> <ellipse cx="136" cy="98" rx="6.5" ry="11" fill="#E0B08C"/> <path d="M66 82 C66 56 82 46 100 46 C118 46 134 56 134 82 L134 104 C134 124 122 140 100 140 C78 140 66 124 66 104 Z" fill="#EBBC97"/> <path d="M58 96 C50 64 62 30 98 26 C124 23 146 36 146 66 C147 78 145 88 142 96 C140 84 137 76 133 72 C129 79 120 80 113 73 C108 81 98 82 91 75 C86 82 76 83 70 77 C65 82 61 88 58 96 Z" fill="#141010"/> <path d="M66 50 C76 40 88 36 100 38 M104 34 C118 34 130 40 138 52 M78 58 C86 52 96 50 104 54" stroke="#2C2420" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".9"/> <path d="M66 78 L72 78 L71 98 Q68 96 66 92 Z" fill="#141010"/> <path d="M134 78 L128 78 L129 98 Q132 96 134 92 Z" fill="#141010"/> <path d="M76 87 L94 86" stroke="#1E1714" stroke-width="3.8" stroke-linecap="round"/> <path d="M106 86 L124 87" stroke="#1E1714" stroke-width="3.8" stroke-linecap="round"/> <g class="eyes"> <path d="M77 98 Q85 93.5 93 98 Q85 100.5 77 98 Z" fill="#FFFFFF"/> <path d="M107 98 Q115 93.5 123 98 Q115 100.5 107 98 Z" fill="#FFFFFF"/> <circle cx="85.5" cy="97.4" r="2.6" fill="#1E1612"/> <circle cx="114.5" cy="97.4" r="2.6" fill="#1E1612"/> <path d="M77 97.5 Q85 92.8 93 97.5" stroke="#3A2A22" stroke-width="1.6" fill="none"/> <path d="M107 97.5 Q115 92.8 123 97.5" stroke="#3A2A22" stroke-width="1.6" fill="none"/> </g> <path d="M100 101 Q97.5 114 101.5 116" stroke="#C99270" stroke-width="2.2" fill="none" stroke-linecap="round"/> <path d="M95 117 Q100 119 105 117" stroke="#C99270" stroke-width="1.6" fill="none" stroke-linecap="round"/> <path d="M91 126 Q100 123.5 109 126 Q100 128 91 126 Z" fill="#B97462"/> <path d="M92 126.5 Q100 131 108 126.5 Q100 129.5 92 126.5 Z" fill="#C98471"/> </g> </svg>`,'<svg viewBox="0 0 24 24" aria-hidden="true"><g class="rays" stroke="#E8B100" stroke-width="1.8" stroke-linecap="round"><path d="M12 1.5v2.2M3.6 5l1.6 1.5M20.4 5l-1.6 1.5M1.8 12h2.2M20 12h2.2"/></g><path class="glass" d="M12 5.5a5.6 5.6 0 0 0-3.4 10.1c.6.5.9 1.1.9 1.8v.6h5v-.6c0-.7.3-1.3.9-1.8A5.6 5.6 0 0 0 12 5.5z"/><path d="M9.6 19.8h4.8M10.3 22h3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'],['Ajif Ramadhan','--sun'],['Aryn Lauken','--ee'],['Oleg Li','--kr'],['Alzhan Zhanaladin','--ru']];
+
+/* ---------------- shared UI state ---------------- */
+const S={year:0, ds:0, on:[1,1,1,1], pg:null, ctry:0, W:PW.slice(), rec:-1, layer:-1, hover:-1, scene:'hero', p:0};
+
+/* hero */
+function setYear(i){ S.year=i; $('yr').textContent=YEARS[i]; $('kzr').textContent=ord(KZ.r[i]); $('rur').textContent=ord(RU.r[i]);
+  $('kzv').textContent='EGDI '+KZ.v[i].toFixed(4); $('ruv').textContent='EGDI '+RU.v[i].toFixed(4);
+  document.querySelectorAll('[data-y]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.y===i)); }
+let ytimer; function play(){ clearTimeout(ytimer); setYear(0); if(reduce){setYear(3);return;} let i=0; const st=()=>{ if(++i<4){ setYear(i); ytimer=setTimeout(st,1500);} }; ytimer=setTimeout(st,1500); }
+document.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>{clearTimeout(ytimer); setYear(+b.dataset.y);});
+$('play').onclick=play;
+
+/* components */
+CO.forEach((c,i)=>{ const b=document.createElement('button'); b.className='chip dot'; b.style.setProperty('--c',`var(${c.c})`); b.textContent=c.n; b.setAttribute('aria-pressed','true');
+  b.onclick=()=>{ S.on[i]=S.on[i]?0:1; b.setAttribute('aria-pressed',!!S.on[i]); compText(); }; $('ctog').appendChild(b); });
+document.querySelectorAll('[data-ds]').forEach(b=>b.onclick=()=>{ S.ds=+b.dataset.ds; document.querySelectorAll('[data-ds]').forEach(x=>x.setAttribute('aria-pressed',x===b)); compText(); });
+function compText(){
+  $('cnote').textContent=DS[S.ds].note;
+  const ins=$('cins');
+  if(S.ds===1){ ins.textContent='Kazakhstan gained 0.141 EGDI points in 2018–2024, Russia 0.056. The two swapped places in 2020.'; return; }
+  const on=S.on.map((v,i)=>v?i:-1).filter(i=>i>=0);
+  if(on.length===1){ const d=DS[0].v[on[0]], names=['online services','infrastructure','human capital']; const lo=d.slice(0,3).indexOf(Math.min(...d.slice(0,3)));
+    ins.textContent=`${CO[on[0]].n}: the weakest component is ${names[lo]} (${d[lo].toFixed(4)}); EGDI ${d[3].toFixed(4)}.`; }
+  else ins.textContent="Kazakhstan's online services (0.9390) are only 0.06 behind Estonia and Korea, but its human capital score is 0.109 below Estonia's. Since 2024 that score includes e-government literacy.";
+}
+compText();
+
+/* citizens */
+PG.filter(g=>g.k!=='ot').forEach((g,i)=>{ const b=document.createElement('button'); b.className='chip dot'; b.style.setProperty('--c',`var(${g.c})`);
+  b.textContent=`${g.n} ${g.v.toFixed(2)}%`; b.setAttribute('aria-pressed','false');
+  b.onclick=()=>{ S.pg=S.pg===i?null:i; $('ptog').querySelectorAll('.chip').forEach((x,j)=>x.setAttribute('aria-pressed',S.pg===j)); citText(); }; $('ptog').appendChild(b); });
+function citText(){ $('pins').textContent=S.pg===null?'Process (33.75%) and operational problems (29.49%) together make up 63.24% of responses.':PG[S.pg].t; }
+citText();
+
+/* countries */
+function showC(i){ S.ctry=i; const c=CT[i];
+  $('tabs').querySelectorAll('.chip').forEach((t,j)=>{ t.setAttribute('aria-selected',j===i); t.tabIndex=j===i?0:-1; });
+  $('cpanel').innerHTML=`<p style="margin:14px 0 4px"><span class="big" style="color:var(${CO[i].c})">${ord(c.rank)}</span> <span class="lead">EGDI ${c.egdi.toFixed(4)}</span></p><p class="lead" style="font-size:14px">${c.model}</p><table class="crit">${c.rows.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join('')}</table>`; }
+CO.forEach((c,i)=>{ const t=document.createElement('button'); t.className='chip'; t.setAttribute('role','tab'); t.style.setProperty('--c',`var(${c.c})`); t.textContent=c.n; t.onclick=()=>showC(i);
+  t.onkeydown=e=>{ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ const n=(i+(e.key==='ArrowRight'?1:3))%4; showC(n); $('tabs').children[n].focus(); } }; $('tabs').appendChild(t); });
+showC(0);
+
+/* score */
+CRIT.forEach((n,i)=>{ const d=document.createElement('div'); d.className='sl';
+  d.innerHTML=`<label for="w${i}">${n}<b id="wl${i}"></b></label><input type="range" id="w${i}" min="0" max="40" value="${S.W[i]}">`; $('sliders').appendChild(d);
+  d.querySelector('input').oninput=e=>{ S.W[i]=+e.target.value; calc(); }; });
+CO.forEach((c,i)=>{ const d=document.createElement('div'); d.style.setProperty('--c',`var(${c.c})`); d.id='bd'+i; d.innerHTML=`<b>0</b><span>${c.n}</span>`; $('board').appendChild(d); });
+S.tot=[0,0,0,0];
+function calc(){ const t=S.W.reduce((a,b)=>a+b,0)||1; S.W.forEach((w,i)=>$('wl'+i).textContent=Math.round(w/t*100)+'%');
+  S.tot=SC.map(s=>s.reduce((a,v,i)=>a+v*S.W[i],0)/t);
+  const order=[0,1,2,3].sort((a,b)=>S.tot[b]-S.tot[a]); S.order=order;
+  order.forEach((ci,pos)=>{ const d=$('bd'+ci); d.style.order=pos; d.querySelector('b').textContent=S.tot[ci].toFixed(2); }); }
+calc();
+const setW=w=>{ S.W=w.slice(); w.forEach((v,i)=>$('w'+i).value=v); calc(); };
+$('wProject').onclick=()=>setW(PW); $('wEqual').onclick=()=>setW([10,10,10,10,10,10]);
+
+/* roadmap */
+R.forEach((r,i)=>{ const b=document.createElement('button'); b.className='rec'; b.setAttribute('aria-expanded','false');
+  b.innerHTML=`<b>${r[0]}</b>${r[1]}<small>Months ${r[2]}–${r[3]}</small><span class="more">${r[4]}</span>`;
+  b.onclick=()=>{ const o=S.rec===i; S.rec=o?-1:i; $('recs').querySelectorAll('.rec').forEach((x,j)=>x.setAttribute('aria-expanded',S.rec===j)); }; $('recs').appendChild(b); });
+/* layers */
+L.forEach((l,i)=>{ const b=document.createElement('button'); b.className='layer'; b.setAttribute('aria-pressed','false');
+  b.innerHTML=`<strong>${l[0]}</strong><span>${l[1]}</span>`;
+  b.onclick=()=>{ S.layer=S.layer===i?-1:i; $('layers').querySelectorAll('.layer').forEach((x,j)=>x.setAttribute('aria-pressed',S.layer===j)); $('anote').textContent=S.layer<0?'Governance runs across all layers: one once-only law (R1), public reliability targets (R3), independent audits (R5) and citizen-experience indicators (R6).':`${l[0]} — ${l[2]}`; };
+  $('layers').appendChild(b); });
+/* team */
+TEAM.forEach(([n,c,av,badge],i)=>{ const li=document.createElement('li'); li.className='member'; li.tabIndex=0; li.setAttribute('aria-label',n); li.style.setProperty('--c',`var(${c})`);
+  const nm=[...n].map((ch,k)=>`<span class="ch${ch===' '?' sp':''}" style="--i:${k}" aria-hidden="true">${ch===' '?'&nbsp;':ch}</span>`).join('');
+  li.innerHTML=(av?`<div class="ava">${av}<span class="badge" aria-hidden="true">${badge}</span></div>`:'')+`<span class="mate">${nm}</span>`;
+  li.onmouseenter=li.onfocus=()=>S.hover=i; li.onmouseleave=li.onblur=()=>S.hover=-1; $('team').appendChild(li); });
+
+/* ---------------- scroll: sections, progress, reveal ---------------- */
+const secs=[...document.querySelectorAll('.scene')];
+secs.forEach(s=>{ const a=document.createElement('a'); a.href='#'+s.id; a.title=s.dataset.name; a.setAttribute('aria-label',s.dataset.name); $('dnav').appendChild(a); });
+const GL={hero:'Each point is one of the 193 UN member states; rank 1 at the top',gap:'Supply vs experience',comp:'Drag to rotate · point at a bar',cit:'Problem types; slice height = share',ctry:'Pillar height = EGDI 2024',score:'Podium reorders with the weights',plan:'Track: months 0 to 36',arch:'Five layers of the target architecture',team:'Five members, one project'};
+function onScroll(){
+  const y=scrollY, H=innerHeight, max=document.body.scrollHeight-H;
+  $('progress').style.transform=`scaleX(${max>0?y/max:0})`;
+  let best=secs[0], bd=1e9;
+  secs.forEach(s=>{ const r=s.getBoundingClientRect(); const d=Math.abs(r.top+r.height/2-H/2); if(d<bd){bd=d;best=s;} });
+  const r=best.getBoundingClientRect(); S.p=Math.min(1,Math.max(0,(H/2-r.top)/r.height));
+  if(S.scene!==best.dataset.s){ S.scene=best.dataset.s; $('glabel').textContent=GL[S.scene]; tip.hidden=true;
+    [...$('dnav').children].forEach((a,i)=>a.classList.toggle('on',secs[i]===best)); }
+}
+addEventListener('scroll',onScroll,{passive:true}); onScroll();
+const ro=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); ro.unobserve(e.target);} }),{threshold:.2});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+play();
+
+/* ================= 3D ================= */
+const canvas=$('gl');
+if(!window.THREE){ $('nogl').hidden=false; return; }
+let renderer; try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true}); }catch(e){ $('nogl').hidden=false; canvas.style.display='none'; return; }
+renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(42,1,0.1,200);
+scene.add(new THREE.HemisphereLight(0xffffff,0x667788,0.9));
+const key=new THREE.DirectionalLight(0xffffff,0.8); key.position.set(6,12,9); scene.add(key);
+const col=n=>new THREE.Color(cv(n));
+const mat=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:col(c),roughness:.42,metalness:.1},o));
+const themed=[]; // [material, varName]
+const tm=(c,o)=>{ const m=mat(c,o); themed.push([m,c]); return m; };
+function sprite(text,size,c,bold=600){
+  const cn=document.createElement('canvas'), g=cn.getContext('2d'), fs=64; const font=`${bold} ${fs}px Onest, Arial, sans-serif`;
+  g.font=font; const w=Math.ceil(g.measureText(text).width)+28; cn.width=w; cn.height=fs+28; g.font=font; g.fillStyle=cv(c); g.textBaseline='middle'; g.fillText(text,14,cn.height/2);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cn),transparent:true,depthWrite:false}));
+  s.scale.set(size*w/cn.height,size,1); s.userData.lab=[text,size,c,bold]; return s; }
+const labels=[]; const lab=(...a)=>{ const s=sprite(...a); labels.push(s); return s; };
+function relabel(){ labels.forEach(s=>{ const [t,z,c,b]=s.userData.lab; const n=sprite(t,z,c,b); s.material.map.dispose(); s.material.map=n.material.map; s.material.needsUpdate=true; }); }
+const lerp=(a,b,t)=>a+(b-a)*t;
+let K=reduce?1:0.075, DT=1; const E=x=>reduce?1:1-Math.pow(1-x,DT);
+
+/* groups registry: each scene has a group with vis */
+const G={}; function group(name){ const g=new THREE.Group(); g.userData.vis=0; scene.add(g); G[name]=g; return g; }
+const pick=[]; // raycast targets {mesh, info()}
+
+/* --- sphere of countries (always present) --- */
+const N=193, SR=3.4;
+const sph=new THREE.Group(); scene.add(sph);
+function fib(i){ const y=1-(i+0.5)/N*2, r=Math.sqrt(1-y*y), th=i*Math.PI*(3-Math.sqrt(5)); return new THREE.Vector3(Math.cos(th)*r,y,Math.sin(th)*r); }
+const pos=new Float32Array(N*3), colr=new Float32Array(N*3);
+for(let i=0;i<N;i++){ const v=fib(i); pos.set([v.x*SR,v.y*SR,v.z*SR],i*3); }
+const pg=new THREE.BufferGeometry(); pg.setAttribute('position',new THREE.BufferAttribute(pos,3)); pg.setAttribute('color',new THREE.BufferAttribute(colr,3));
+const pm=new THREE.PointsMaterial({size:.16,vertexColors:true,transparent:true,opacity:1,depthWrite:false});
+function dotColors(){ const a=col('--dot-vh'), b=col('--dot'); for(let i=0;i<N;i++){ const c=i<76?a:b; colr.set([c.r,c.g,c.b],i*3);} pg.attributes.color.needsUpdate=true; }
+dotColors(); sph.add(new THREE.Points(pg,pm));
+const ringG=new THREE.Mesh(new THREE.TorusGeometry(SR*1.35,.012,8,160),tm('--line')); ringG.rotation.x=Math.PI/2.3; sph.add(ringG);
+const mk={};
+[['kz','--kz','Kazakhstan'],['ru','--ru','Russia']].forEach(([k,c,n])=>{ const g=new THREE.Group();
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(.2,24,16),tm(c,{emissive:col(c),emissiveIntensity:.35})); g.add(ball);
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(.34,24,16),new THREE.MeshBasicMaterial({color:col(c),transparent:true,opacity:.22,depthWrite:false})); themed.push([halo.material,c]); g.add(halo);
+  const s=lab(n,.34,c,700); s.position.set(0,.55,0); g.add(s); g.userData.cur=fib(KZ.r[0]-1).multiplyScalar(SR*1.08); sph.add(g); mk[k]=g; });
+/* team orbiters */
+const orb=TEAM.map((t,i)=>{ const m=new THREE.Mesh(new THREE.SphereGeometry(.22,24,16),tm(t[1],{emissive:col(t[1]),emissiveIntensity:.3})); m.visible=false; sph.add(m); return m; });
+
+/* --- gap: seesaw --- */
+const gGap=group('gap');
+const base=new THREE.Mesh(new THREE.ConeGeometry(.9,1.4,3),tm('--muted')); base.position.y=.7; gGap.add(base);
+const plank=new THREE.Group(); plank.position.y=1.45; gGap.add(plank);
+plank.add(new THREE.Mesh(new THREE.BoxGeometry(7.2,.16,1.6),tm('--line')));
+const sup=[], exp=[];
+for(let i=0;i<4;i++){ const b=new THREE.Mesh(new THREE.BoxGeometry(.7,.7,.7),tm('--kz')); b.position.set(-3+ (i%2)*.8,.43+Math.floor(i/2)*.75,(i%2?.3:-.3)); plank.add(b); sup.push(b);
+  const e=new THREE.Mesh(new THREE.BoxGeometry(.7,.7,.7),tm('--ru')); e.position.set(2.4+(i%2)*.8,.43+Math.floor(i/2)*.75,(i%2?.3:-.3)); plank.add(e); exp.push(e); }
+const l1=lab('Ranking',.42,'--kz',700); l1.position.set(-2.6,2.2,0); plank.add(l1);
+const l2=lab('Experience',.42,'--ru',700); l2.position.set(2.8,2.2,0); plank.add(l2);
+
+/* --- comp: 3D bars 4x4 --- */
+const gComp=group('comp'); const SP=1.45, BH=4;
+const bgeo=new THREE.BoxGeometry(.9,1,.9); bgeo.translate(0,.5,0);
+const bars=[];
+for(let r=0;r<4;r++) for(let c=0;c<4;c++){ const m=new THREE.Mesh(bgeo,new THREE.MeshStandardMaterial({roughness:.4,metalness:.1})); m.scale.y=.001; m.userData={r,c,t:.001}; gComp.add(m); bars.push(m);
+  pick.push({mesh:m,scene:'comp',info:()=>{ const d=DS[S.ds]; return m.userData.t>.02?`<b>${m.userData.v.toFixed(4)}</b>${CO[d.rows[r]].n} · ${d.cols[c]}`:null; }}); }
+const cgrid=new THREE.GridHelper(8,8); gComp.add(cgrid);
+let clabs=[];
+function compBuild(){ const d=DS[S.ds], nr=d.rows.length, nc=d.cols.length;
+  clabs.forEach(s=>{gComp.remove(s); const i=labels.indexOf(s); if(i>=0) labels.splice(i,1);}); clabs=[];
+  bars.forEach(b=>{ const {r,c}=b.userData; if(r<nr&&c<nc){ const ci=d.rows[r]; b.position.set((c-(nc-1)/2)*SP,0,(r-(nr-1)/2)*SP); b.material.color.copy(col(CO[ci].c));
+      b.userData.v=d.v[r][c]; b.userData.t=S.on[ci]?Math.max(.05,(d.v[r][c]-d.min)/(1-d.min)*BH):.05; b.userData.dim=!S.on[ci]; } else b.userData.t=.001; });
+  d.cols.forEach((t,c)=>{ const s=lab(t,.36,'--ink',700); s.position.set((c-(nc-1)/2)*SP,.22,((nr-1)/2)*SP+1); gComp.add(s); clabs.push(s); });
+  d.rows.forEach((ci,r)=>{ const s=lab(CO[ci].n,.34,CO[ci].c,700); s.center.set(1,.5); s.position.set(-((nc-1)/2)*SP-.8,.22,(r-(nr-1)/2)*SP); gComp.add(s); clabs.push(s); });
+  S._ck=S.ds+'|'+S.on.join(''); }
+compBuild();
+
+/* --- cit: donut --- */
+const gCit=group('cit'); const segs=[];
+(function(){ let a0=Math.PI/2; const tot=PG.reduce((s,g)=>s+g.v,0);
+  PG.forEach((g,i)=>{ const a1=a0-g.v/tot*Math.PI*2, gap=.03;
+    const sh=new THREE.Shape(); const R1=1.4,R2=3.1; const s0=a0-gap, s1=a1+gap;
+    sh.absarc(0,0,R2,s0,s1,true); sh.lineTo(Math.cos(s1)*R1,Math.sin(s1)*R1); sh.absarc(0,0,R1,s1,s0,false); sh.closePath();
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:1,bevelEnabled:true,bevelThickness:.04,bevelSize:.04,bevelSegments:2,curveSegments:40});
+    geo.rotateX(-Math.PI/2); const m=new THREE.Mesh(geo,tm(g.c)); m.scale.y=.001;
+    const mid=(s0+s1)/2; m.userData={h:.4+g.v/33.75*2.2, dir:new THREE.Vector3(Math.cos(mid),0,-Math.sin(mid)), i};
+    gCit.add(m); segs.push(m);
+    const s=lab(g.v.toFixed(1)+'%',.36,'--ink',700); s.position.set(Math.cos(mid)*3.75,.4,-Math.sin(mid)*3.75); gCit.add(s);
+    pick.push({mesh:m,scene:'cit',info:()=>`<b>${g.v.toFixed(2)}%</b>${g.n}`});
+    a0=a1; }); })();
+const cTotal=lab('63.24%',.7,'--ink',700); cTotal.position.y=1.1; gCit.add(cTotal);
+const cSub=lab('process + operational',.26,'--muted',500); cSub.position.y=.55; gCit.add(cSub);
+
+/* --- ctry: pillars --- */
+const gCtry=group('ctry'); const pil=[];
+CO.forEach((c,i)=>{ const g=new THREE.Group(); const a=(i-1.5)*.62; g.position.set(Math.sin(a)*4.2,0,-Math.cos(a)*4.2+4);
+  const h=(CT[i].egdi-.8)/.2*4.5+.4;
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(.62,.72,1,6),tm(c.c,{emissive:col(c.c),emissiveIntensity:0})); m.geometry.translate(0,.5,0); m.scale.y=.001; m.userData.h=h; g.add(m);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.12,6),tm('--line')); cap.position.y=.06; g.add(cap);
+  const s1=lab(ord(CT[i].rank),.55,c.c,700); s1.userData.base=h; g.add(s1); const s2=lab(c.n,.3,'--ink',600); g.add(s2);
+  g.userData={m,s1,s2,h}; gCtry.add(g); pil.push(g);
+  pick.push({mesh:m,scene:'ctry',info:()=>`<b>EGDI ${CT[i].egdi.toFixed(4)}</b>${c.n} · ${ord(CT[i].rank)} of 193`}); });
+
+/* --- score: podium --- */
+const gScore=group('score'); const pod=[];
+CO.forEach((c,i)=>{ const g=new THREE.Group(); const m=new THREE.Mesh(new THREE.BoxGeometry(1.25,1,1.25),tm(c.c)); m.geometry.translate(0,.5,0); m.scale.y=.001; g.add(m);
+  const s=lab('0.00',.42,'--ink',700); g.add(s); const n=lab(c.n,.28,c.c,700); n.position.set(0,-.35,.9); g.add(n);
+  g.userData={m,s,x:0}; gScore.add(g); pod.push(g);
+  pick.push({mesh:m,scene:'score',info:()=>`<b>${S.tot[i].toFixed(2)} / 5</b>${c.n}`}); });
+const pfloor=new THREE.Mesh(new THREE.CylinderGeometry(4.6,4.8,.18,64),tm('--line')); pfloor.position.y=-.09; gScore.add(pfloor);
+
+/* --- plan: timeline --- */
+const gPlan=group('plan'); const TL=9; const caps=[];
+const track=new THREE.Mesh(new THREE.BoxGeometry(TL+.6,.1,4.2),tm('--line')); track.position.set(0,-.05,0); gPlan.add(track);
+[0,12,24,36].forEach(m=>{ const x=-TL/2+m/36*TL; const t=new THREE.Mesh(new THREE.BoxGeometry(.04,.02,4.2),tm('--muted')); t.position.set(x,.01,0); gPlan.add(t);
+  const s=lab(m===0?'0':m+' mo',.3,'--muted',600); s.position.set(x,.25,2.5); gPlan.add(s); });
+R.forEach((r,i)=>{ const len=(r[3]-r[2])/36*TL, x=-TL/2+(r[2]/36*TL)+len/2, z=-1.75+i*.7;
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,1,24),tm('--kz',{emissive:col('--sun'),emissiveIntensity:0})); m.rotation.z=Math.PI/2; m.position.set(x,.25,z); m.scale.y=.001; m.userData={len,z}; gPlan.add(m); caps.push(m);
+  const s=lab(r[0],.3,'--ink',700); s.position.set(-TL/2+(r[2]/36*TL)-.35,.3,z); gPlan.add(s);
+  pick.push({mesh:m,scene:'plan',info:()=>`<b>${r[0]}</b>${r[1]} · months ${r[2]}–${r[3]}`}); });
+
+/* --- arch: slabs --- */
+const gArch=group('arch'); const slabs=[]; const SC_=['--kz','--sun','--ee','--ru','--kr'];
+L.forEach((l,i)=>{ const g=new THREE.Group(); const m=new THREE.Mesh(new THREE.BoxGeometry(5.4,.42,3.4),tm(SC_[i],{transparent:true,opacity:.92})); g.add(m);
+  const s=lab(l[0],.32,'--ink',700); s.position.set(0,.4,1.9); g.add(s); g.userData={y:(4-i)*.95,x:0}; g.position.y=(4-i)*.95; gArch.add(g); slabs.push(g);
+  pick.push({mesh:m,scene:'arch',info:()=>`<b>${l[0]}</b>${l[1]}`}); });
+const pipe=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,4.4,12),tm('--muted')); pipe.position.set(-3,2,0); gArch.add(pipe);
+const gov=new THREE.Mesh(new THREE.BoxGeometry(.5,4.6,3.4),new THREE.MeshStandardMaterial({color:col('--muted'),transparent:true,opacity:.18})); themed.push([gov.material,'--muted']); gov.position.set(3.2,1.9,0); gArch.add(gov);
+const govl=lab('Governance',.3,'--muted',700); govl.position.set(3.2,4.5,0); gArch.add(govl);
+
+/* ---------------- camera presets ---------------- */
+const CAM={hero:[0,.6,12.5,0,.1,0], gap:[0,4.5,13,0,1.4,0], comp:[9,8.5,12.5,0,1.4,0], cit:[0,9,11,0,.4,0], ctry:[0,5,14.5,0,2,1.6], score:[0,4.6,12.5,0,1.8,0], plan:[3,8,11,0,0,0], arch:[9,6,10.5,0,1.9,0], team:[0,.8,12,0,0,0]};
+const cp=new THREE.Vector3(0,1.2,10.5), cl=new THREE.Vector3(), tp=new THREE.Vector3(), tl=new THREE.Vector3();
+let orbit=0, drag=null, mx=0, my=0;
+addEventListener('pointermove',e=>{ mx=e.clientX/innerWidth-.5; my=e.clientY/innerHeight-.5; });
+
+/* drag to rotate (on canvas area, outside cards) */
+const hitCard=e=>e.target.closest&&e.target.closest('.card,header,button,input,a');
+addEventListener('pointerdown',e=>{ if(hitCard(e)) return; const r=canvas.getBoundingClientRect(); if(e.clientX<r.left) return; drag={x:e.clientX,o:orbit}; });
+addEventListener('pointerup',()=>drag=null);
+const ray=new THREE.Raycaster(), mp=new THREE.Vector2();
+addEventListener('pointermove',e=>{
+  if(drag){ orbit=drag.o-(e.clientX-drag.x)*.006; tip.hidden=true; return; }
+  const r=canvas.getBoundingClientRect(); if(e.clientX<r.left||hitCard(e)||e.pointerType==='touch'){ tip.hidden=true; return; }
+  mp.set((e.clientX-r.left)/r.width*2-1, -(e.clientY-r.top)/r.height*2+1); ray.setFromCamera(mp,cam);
+  const cand=pick.filter(p=>p.scene===S.scene && p.mesh.visible);
+  const hit=ray.intersectObjects(cand.map(p=>p.mesh))[0];
+  if(hit){ const p=cand.find(x=>x.mesh===hit.object), html=p.info(); if(html){ tip.innerHTML=html; tip.style.left=e.clientX+'px'; tip.style.top=e.clientY+'px'; tip.hidden=false; return; } }
+  tip.hidden=true;
+});
+
+function resize(){ const w=canvas.clientWidth, h=canvas.clientHeight; renderer.setSize(w,h,false); cam.aspect=w/h; if(innerWidth<=860) cam.setViewOffset(w,h,0,h*.13,w,h); else cam.clearViewOffset(); cam.updateProjectionMatrix(); }
+addEventListener('resize',resize); resize();
+const onTheme=()=>{ themed.forEach(([m,c])=>{ m.color.copy(col(c)); if(m.emissive&&m.emissiveIntensity) m.emissive.copy(col(c)); }); dotColors(); relabel(); compBuild(); cgrid.material.color.copy(col('--line')); };
+new MutationObserver(onTheme).observe(root,{attributes:true,attributeFilter:['data-theme']});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',onTheme);
+cgrid.material.color.copy(col('--line')); cgrid.material.transparent=true; cgrid.material.opacity=.7;
+
+const clock=new THREE.Clock();
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(.1,clock.getDelta()); DT=dt*60; K=E(.075); const t=clock.elapsedTime, sc=S.scene, mob=innerWidth<=860;
+  /* group visibility */
+  Object.entries(G).forEach(([n,g])=>{ const v=g.userData.vis=lerp(g.userData.vis,n===sc?1:0,E(.09)); g.visible=v>.01; const e=1-Math.pow(1-v,3); g.scale.setScalar(.6+.4*e); g.position.y=(1-e)*-1.5; g.rotation.y=(1-e)*.6; });
+  /* sphere */
+  const heroish=sc==='hero'||sc==='team';
+  const ss=heroish?1:4.6; sph.scale.setScalar(lerp(sph.scale.x,ss,E(.05))); pm.opacity=lerp(pm.opacity,heroish?1:.35,E(.05)); pm.size=heroish?.16:.09;
+  sph.rotation.y+= reduce?0:(heroish?.0025:.0008)*DT; ringG.rotation.z=t*.1;
+  [['kz',KZ],['ru',RU]].forEach(([k,d])=>{ const g=mk[k]; g.visible=sc==='hero'; const target=fib(d.r[S.year]-1).multiplyScalar(SR*1.08); g.userData.cur.lerp(target,K); g.position.copy(g.userData.cur); g.children[1].scale.setScalar(1+.25*Math.sin(t*3)); });
+  orb.forEach((m,i)=>{ m.visible=sc==='team'; const a=t*.6+i*Math.PI*2/5, rr=SR*1.35; m.position.set(Math.cos(a)*rr,Math.sin(t*.8+i)*.6,Math.sin(a)*rr); m.scale.setScalar(lerp(m.scale.x,S.hover===i?2.1:1,E(.15))); });
+  /* gap */
+  if(G.gap.visible){ plank.rotation.z=lerp(plank.rotation.z,-.2+Math.sin(t*1.2)*.02,K*.6); sup.concat(exp).forEach((b,i)=>b.rotation.y=Math.sin(t+i)*.08); }
+  /* comp */
+  if(G.comp.visible){ if(S._ck!==S.ds+'|'+S.on.join('')){ bars.forEach(b=>{ if(S._ck.split('|')[0]!==String(S.ds)) b.scale.y=.001; }); compBuild(); }
+    bars.forEach(b=>{ b.scale.y=lerp(b.scale.y,b.userData.t,K); b.visible=b.scale.y>.01; b.material.opacity=b.userData.dim?.25:1; b.material.transparent=!!b.userData.dim; }); }
+  /* cit */
+  if(G.cit.visible){ segs.forEach(m=>{ const u=m.userData, sel=S.pg===u.i, dim=S.pg!==null&&!sel; m.scale.y=lerp(m.scale.y,u.h*(dim?.45:1)*(sel?1.25:1),K); const off=sel?.5:0; m.position.x=lerp(m.position.x,u.dir.x*off,K); m.position.z=lerp(m.position.z,u.dir.z*off,K); });
+    G.cit.rotation.y+=reduce?0:.002*DT; }
+  /* ctry */
+  if(G.ctry.visible){ pil.forEach((g,i)=>{ const u=g.userData, act=S.ctry===i; u.m.scale.y=lerp(u.m.scale.y,u.h*(act?1.12:1),K); u.m.material.emissiveIntensity=lerp(u.m.material.emissiveIntensity,act?.35:0,.1);
+      g.position.y=lerp(g.position.y,act?.35:0,K); u.s1.position.y=u.m.scale.y+.5+Math.sin(t*2+i)*.06; u.s2.position.y=-.35; g.rotation.y=act?t*.6:lerp(g.rotation.y,0,.05); }); }
+  /* score */
+  if(G.score.visible){ const order=S.order||[0,1,2,3]; pod.forEach((g,i)=>{ const u=g.userData, pos=order.indexOf(i), x=(pos-1.5)*1.7*-1+0; u.x=lerp(u.x,(1.5-pos)*-1.7*-1,K); g.position.x=-((pos-1.5)*1.7); g.position.x=lerp(g.userData.px??g.position.x,-((pos-1.5)*1.7)*-1,K); g.userData.px=g.position.x;
+      const h=Math.max(.05,(S.tot[i]-1)/4*4); u.m.scale.y=lerp(u.m.scale.y,h,K); u.s.position.y=u.m.scale.y+.45;
+      const txt=S.tot[i].toFixed(2); if(u.s.userData.lab[0]!==txt){ const n=sprite(txt,.42,'--ink',700); u.s.material.map.dispose(); u.s.material.map=n.material.map; u.s.userData.lab[0]=txt; u.s.scale.copy(n.scale); } }); }
+  /* plan */
+  if(G.plan.visible){ caps.forEach((m,i)=>{ const sel=S.rec===i; m.scale.y=lerp(m.scale.y,m.userData.len,K*.8); m.position.y=lerp(m.position.y,sel?.75:.25,K); m.material.emissiveIntensity=lerp(m.material.emissiveIntensity,sel?.6:0,.1); m.material.color.lerp(col(sel?'--sun':'--kz'),.1); }); }
+  /* arch */
+  if(G.arch.visible){ slabs.forEach((g,i)=>{ const sel=S.layer===i, any=S.layer>=0; g.position.x=lerp(g.position.x,sel?-2.2:0,K); g.position.y=lerp(g.position.y,g.userData.y+(any?(i<S.layer?.35:i>S.layer?-.35:0):Math.sin(t*1.4+i)*.05),K); }); }
+  /* camera */
+  const c=CAM[sc]; tp.set(c[0],c[1],c[2]); tl.set(c[3],c[4],c[5]);
+  const a=orbit+(reduce?0:S.p*.5-.25)+(reduce?0:mx*.25), cs=Math.cos(a), sn=Math.sin(a);
+  tp.set(tp.x*cs+tp.z*sn, tp.y-(reduce?0:my*1.2), -tp.x*sn+tp.z*cs);
+  if(mob) tp.multiplyScalar(1.1/Math.min(1,cam.aspect+.2));
+  cp.lerp(tp,E(.05)); cl.lerp(tl,E(.06)); cam.position.copy(cp); cam.lookAt(cl);
+  renderer.render(scene,cam);
+}
+frame();
+})();
+</script>
+</body>
+</html>
